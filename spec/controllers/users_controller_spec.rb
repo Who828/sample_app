@@ -70,30 +70,52 @@ describe UsersController do
           response.should render_template('new')
         end
       end
-    describe 'sucess' do
+      describe 'sucess' do
 
-      before(:each) do
-        @attr = { :name => "Smit Shah", :email => "who828@gmail.com",
-          :password => "foobar", :password_confirmation => "foobar" }
-      end
-      it "should create a user" do
-          lambda do
+        before(:each) do
+          @attr = { :name => "Smit Shah", :email => "who828@gmail.com",
+            :password => "foobar", :password_confirmation => "foobar" }
+          end
+          it "should create a user" do
+            lambda do
+              post :create, :user => @attr
+            end.should change(User,:count).by(1)
+          end
+          it "should redirect to user show page" do
             post :create, :user => @attr
-          end.should change(User,:count).by(1)
+            response.should redirect_to(user_path(assigns(:user)))
+          end
+          it "should have a welcome message" do
+            post :create, :user => @attr
+            flash[:success].should =~ /welcome to the sample app/i
+          end
+          it "should sign the user in" do
+            post :create, :user => @attr
+            controller.should be_signed_in
+          end
+        end
       end
-      it "should redirect to user show page" do
-          post :create, :user => @attr
-          response.should redirect_to(user_path(assigns(:user)))
-      end
-      it "should have a welcome message" do
-        post :create, :user => @attr
-        flash[:success].should =~ /welcome to the sample app/i
-      end
-      it "should sign the user in" do
-        post :create, :user => @attr
-        controller.should be_signed_in
+      describe "GET 'edit'" do
+
+        before(:each) do
+          @user = Factory(:user)
+          test_sign_in(@user)
+        end
+
+        it "should be successful" do
+          get :edit, :id => @user
+          response.should be_success
+        end
+
+        it "should have the right title" do
+          get :edit, :id => @user
+          response.should have_selector("title", :content => "Edit user")
+        end
+
+        it "should have a link to change the Gravatar" do
+          get :edit, :id => @user
+          gravatar_url = "http://gravatar.com/emails"
+          response.should have_selector("a", :href => gravatar_url, :content => "change")
+        end
       end
     end
-  end
-end
-
