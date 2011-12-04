@@ -2,6 +2,7 @@ source 'http://rubygems.org'
 
 gem 'rails', '3.1.1'
 gem 'gravatar_image_tag'
+gem 'will_paginate'
 
 group :production do
   gem 'pg'
@@ -24,6 +25,7 @@ gem 'jquery-rails'
 group :development do
   gem 'rspec-rails'
   gem 'annotate', git:'git://github.com/ctran/annotate_models.git'
+  gem 'faker'
 end
 
 group :test do
