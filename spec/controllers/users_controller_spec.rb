@@ -38,23 +38,23 @@ describe UsersController do
       end
 
       it "should have an element for each user" do
-          get :index
-          @users[0..2].each do |user|
-            response.should have_selector("li", :content => user.name)
-          end
-        end
-
-        it "should paginate users" do
-          get :index
-          response.should have_selector("div.pagination")
-          response.should have_selector("span.disabled", :content => "Previous")
-          response.should have_selector("a", :href => "/users?page=2",
-          :content => "2")
-          response.should have_selector("a", :href => "/users?page=2",
-          :content => "Next")
+        get :index
+        @users[0..2].each do |user|
+          response.should have_selector("li", :content => user.name)
         end
       end
+
+      it "should paginate users" do
+        get :index
+        response.should have_selector("div.pagination")
+        response.should have_selector("span.disabled", :content => "Previous")
+        response.should have_selector("a", :href => "/users?page=2",
+        :content => "2")
+        response.should have_selector("a", :href => "/users?page=2",
+        :content => "Next")
+      end
     end
+  end
   describe "GET 'show'" do
 
     before(:each) do
@@ -84,6 +84,13 @@ describe UsersController do
     it "should have a profile image" do
       get :show, :id => @user
       response.should have_selector("h1>img", :class => "gravatar")
+    end
+    it "should show the user's microposts" do
+      mp1 = Factory(:micropost, :user => @user, :content => "Foo bar")
+      mp2 = Factory(:micropost, :user => @user, :content => "Baz quux")
+      get :show, :id => @user
+      response.should have_selector("span.content", :content => mp1.content)
+      response.should have_selector("span.content", :content => mp2.content)
     end
   end  
 
@@ -261,43 +268,43 @@ describe UsersController do
       end
       describe "DELETE 'destroy'" do
 
-    before(:each) do
-      @user = Factory(:user)
-    end
+        before(:each) do
+          @user = Factory(:user)
+        end
 
-    describe "as a non-signed-in user" do
-      it "should deny access" do
-        delete :destroy, :id => @user
-        response.should redirect_to(signin_path)
+        describe "as a non-signed-in user" do
+          it "should deny access" do
+            delete :destroy, :id => @user
+            response.should redirect_to(signin_path)
+          end
+        end
+
+        describe "as a non-admin user" do
+          it "should protect the page" do
+            test_sign_in(@user)
+            delete :destroy, :id => @user
+            response.should redirect_to(root_path)
+          end
+        end
+
+        describe "as an admin user" do
+
+          before(:each) do
+            admin = Factory(:user, :email => "admin@example.com", :admin => true)
+            test_sign_in(admin)
+          end
+
+          it "should destroy the user" do
+            lambda do
+              delete :destroy, :id => @user
+            end.should change(User, :count).by(-1)
+          end
+
+          it "should redirect to the users page" do
+            delete :destroy, :id => @user
+            response.should redirect_to(users_path)
+          end
+        end
       end
     end
-
-    describe "as a non-admin user" do
-      it "should protect the page" do
-        test_sign_in(@user)
-        delete :destroy, :id => @user
-        response.should redirect_to(root_path)
-      end
-    end
-
-    describe "as an admin user" do
-
-      before(:each) do
-        admin = Factory(:user, :email => "admin@example.com", :admin => true)
-        test_sign_in(admin)
-      end
-
-      it "should destroy the user" do
-        lambda do
-          delete :destroy, :id => @user
-        end.should change(User, :count).by(-1)
-      end
-
-      it "should redirect to the users page" do
-        delete :destroy, :id => @user
-        response.should redirect_to(users_path)
-      end
-    end
-  end
-end
 
