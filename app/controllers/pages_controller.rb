@@ -8,7 +8,6 @@ def home
     end
   end
 
-
 def contact
   @title = "Contact"
 end
