@@ -1,6 +1,6 @@
 module ApplicationHelper
   def title
-    base_title = "Ruby on Rails Micro-blogging App"
+    base_title = "Ruby on Rails microblogr App"
     
     if @title.nil?
       base_title
@@ -9,6 +9,6 @@ module ApplicationHelper
     end
   end
   def logo
-  image_tag("twitter.png", alt: "Twitter", class: "round",width: 190,height: 40 )
+  image_tag("twitter.png", alt: "Twitter", class: "round",width: 200,height: 55 )
   end
 end
